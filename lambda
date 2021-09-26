@@ -1,0 +1,39 @@
+import time
+import json
+import boto3
+
+
+def lambda_handler(event, context):
+
+    # boto3 client
+    client = boto3.client("ec2")
+    ssm = boto3.client("ssm")
+
+    # Filter instance by tag
+    describeInstance = client.describe_instances(
+      Filters=[
+        {
+            'Name': 'tag:test',
+            'Values': [
+                'agentcloud',
+            ]
+        },
+    ],
+        )
+
+    InstanceId = []
+    # fetchin instance id of the running instances
+    for i in describeInstance["Reservations"]:
+        for instance in i["Instances"]:
+            if instance["State"]["Name"] == "running":
+                InstanceId.append(instance["InstanceId"])
+
+    # looping through instance ids
+    for instanceid in InstanceId:
+        # command to be executed on instance via SSM
+        response = ssm.send_command(
+            InstanceIds=[instanceid],
+            DocumentName="AWS-RunShellScript",
+            Parameters={"commands": ['wget https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm; sudo yum install amazon-cloudwatch-agent -y; sudo amazon-cloudwatch-agent-ctl -a stop']
+            },  # replace command_to_be_executed with command
+        )
