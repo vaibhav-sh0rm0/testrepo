@@ -1,2 +1,32 @@
 line 1
 second
+
+
+ # Oracle Binary Disk
+      AWSNONPOEMO01BinaryDisk1:
+       Type: AWS::EC2::Volume
+       Properties:
+         Size: 200
+         VolumeType: gp2
+         Encrypted: true
+         AvailabilityZone: !GetAtt NPOEMEC2.AvailabilityZone
+         Tags:
+           - Key: Name
+             Value: AWS-NONP-OEMO-01-BinaryDisk1
+           - Key: Environment
+             Value: !Ref EnvName  
+           - Key: 'foxtel:service-name'
+             Value: !Ref ServiceName
+           - Key: Security Domain
+             Value: !Ref SecurityDomain
+           - Key: aws-migration-project-id
+             Value: !Ref 'awsmigrationproject'
+           - Key: map-migrated
+             Value: !Ref 'mapmigrated'
+        
+      MountAWSNONPOEMO01BinaryDisk1:
+        Type: AWS::EC2::VolumeAttachment
+        Properties:
+          InstanceId: !Ref NPOEMEC2
+          VolumeId: !Ref AWSNONPOEMO01BinaryDisk1
+          Device: /dev/sdf
