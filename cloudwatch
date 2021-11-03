@@ -1,0 +1,81 @@
+  MySNSTopic: 
+    Type: AWS::SNS::Topic
+    Properties: 
+      Subscription: 
+        - Endpoint: "viveksh0rm0@gmail.com"
+          Protocol: "email"
+        - Endpoint: "viveksh240395@gmail.com"
+          Protocol: "email"  
+      TopicName: newsns1
+
+  IDMDBCPUAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: CPU alarm for my instance
+      AlarmActions:
+      - Ref: MySNSTopic
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2
+      Statistic: Average
+      Period: '900'
+      EvaluationPeriods: '1'
+      Threshold: '80'
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+      - Name: InstanceId
+        Value: !Ref EC2InstanceDemoSvr
+  IDMDBMemoryAlarmWARNING:
+    Type: AWS::CloudWatch::Alarm
+    DeletionPolicy: Retain
+    Properties:
+      AlarmDescription: Memory alarm
+      AlarmActions:
+      - !Ref MySNSTopic
+      MetricName: "Memory utilization"
+      Namespace: CWAgent
+      Statistic: Average
+      Period: '60'
+      EvaluationPeriods: '1'
+      Threshold: '90'
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+      - Name: InstanceId
+        Value: !Ref EC2InstanceDemoSvr
+  SystemStatusAlarmCRITICAL:
+    Type: AWS::CloudWatch::Alarm
+    DeletionPolicy: Retain
+    Properties:
+      AlarmDescription: StatusCheckFailed_System
+      Namespace: AWS/EC2
+      MetricName: StatusCheckFailed_System
+      Statistic: Minimum
+      Period: '60'
+      EvaluationPeriods: '2'
+      ComparisonOperator: GreaterThanThreshold
+      Threshold: '1'
+      AlarmActions:
+      - !Ref MySNSTopic
+      OKActions:
+      - !Ref MySNSTopic
+      Dimensions:
+      - Name: InstanceId
+        Value: !Ref EC2InstanceDemoSvr
+  SystemStatusAlarmCRITICAL:
+    Type: AWS::CloudWatch::Alarm
+    DeletionPolicy: Retain
+    Properties:
+      AlarmDescription: StatusCheckFailed_Instance
+      Namespace: AWS/EC2
+      MetricName: StatusCheckFailed_Instance
+      Statistic: Minimum
+      Period: '60'
+      EvaluationPeriods: '2'
+      ComparisonOperator: GreaterThanThreshold
+      Threshold: '1'
+      AlarmActions:
+      - !Ref MySNSTopic
+      OKActions:
+      - !Ref MySNSTopic
+      Dimensions:
+      - Name: InstanceId
+        Value: !Ref EC2InstanceDemoSvr
